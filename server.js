@@ -93,3 +93,7 @@ app.get("/companies", (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server jalan di port ${PORT}`);
 });
+// TEST LOGIN VIA BROWSER
+app.get("/login-test", (req, res) => {
+  res.send("Login route aktif ✅");
+});
