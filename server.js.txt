@@ -6,8 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const SECRET = process.env.JWT_SECRET || "rtms_secret_key"; // use env var in production
-const PORT = process.env.PORT || 3000; // Railway sets this automatically
+const SECRET = "rtms_secret_key";
 
 // DATA USER
 const users = [
@@ -27,17 +26,21 @@ const companies = [
 // LOGIN
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
+
   const user = users.find(
     u => u.username === username && u.password === password
   );
+
   if (!user) {
     return res.status(401).json({ message: "Login gagal" });
   }
+
   const token = jwt.sign(
     { username: user.username, companies: user.companies },
     SECRET,
     { expiresIn: "1h" }
   );
+
   res.json({ message: "Login sukses", token });
 });
 
@@ -45,21 +48,32 @@ app.post("/login", (req, res) => {
 app.get("/companies", (req, res) => {
   const auth = req.headers.authorization;
   if (!auth) return res.sendStatus(403);
+
   const token = auth.split(" ")[1];
+
   try {
     const decoded = jwt.verify(token, SECRET);
+
     let allowedCompanies;
+
     if (decoded.companies.includes("ALL")) {
       allowedCompanies = companies;
     } else {
-      allowedCompanies = companies.filter(c => decoded.companies.includes(c));
+      allowedCompanies = companies.filter(c =>
+        decoded.companies.includes(c)
+      );
     }
-    res.json({ username: decoded.username, companies: allowedCompanies });
+
+    res.json({
+      username: decoded.username,
+      companies: allowedCompanies
+    });
+
   } catch {
     res.sendStatus(401);
   }
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server jalan di port ${PORT}`);
+app.listen(3000, () => {
+  console.log("Server jalan di http://localhost:3000");
 });
